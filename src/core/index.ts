@@ -1,9 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
-type Primitive = string | number | boolean | symbol | null | undefined | bigint;
-
-type IsPrimitive<T> = T extends Primitive ? T : T[keyof T];
-
 type SetStateCallback<T> = (state: T) => T;
 
 type Store<T> = {
@@ -37,9 +33,9 @@ export const createStore = <T>(initialState: T): Store<T> => {
   return { getState, setState, subscribe };
 };
 
-export const useStore = <T>(
+export const useStore = <T, U>(
   store: Store<T>,
-  selector: (state: T) => IsPrimitive<T>
+  selector: (state: T) => U,
 ): UseStoreReturn<T, ReturnType<typeof selector>> => {
   const slice = useSyncExternalStore(
     store.subscribe,
