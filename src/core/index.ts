@@ -1,30 +1,35 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
-type SetStateCallback<T> = (state: T) => T;
+type Primitive = string | number | boolean | symbol | null | undefined | bigint;
 
-type Listener = () => void
+type IsPrimitive<T> = T extends Primitive ? T : T[keyof T];
+
+type SetStateCallback<T> = (state: T) => T;
 
 type Store<T> = {
   getState: () => T;
   setState: (fn: SetStateCallback<T>) => void;
-  subscribe: (listener: Listener) => () => boolean;
-}
+  subscribe: (listener: () => void) => () => boolean;
+};
 
-type UseStoreReturn<T> = [T[keyof T], (fn: SetStateCallback<T>) => void];
+type UseStoreReturn<T, Selector> = [
+  Selector,
+  (fn: SetStateCallback<T>) => void
+];
 
 export const createStore = <T>(initialState: T): Store<T> => {
   let state: T = initialState;
 
   const getState = () => state;
 
-  const listeners = new Set<Listener>();
+  const listeners = new Set<() => void>();
 
   const setState = (fn: SetStateCallback<T>) => {
     state = fn(state);
     listeners.forEach((listener) => listener());
   };
 
-  const subscribe = (listener: Listener) => {
+  const subscribe = (listener: () => void) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   };
@@ -32,10 +37,13 @@ export const createStore = <T>(initialState: T): Store<T> => {
   return { getState, setState, subscribe };
 };
 
-export const useStore = <T>(store: Store<T>, selector: (state: T) => T[keyof T]): UseStoreReturn<T> => {
+export const useStore = <T>(
+  store: Store<T>,
+  selector: (state: T) => IsPrimitive<T>
+): UseStoreReturn<T, ReturnType<typeof selector>> => {
   const slice = useSyncExternalStore(
     store.subscribe,
-    useCallback(() => selector(store.getState()), [store, selector]),
+    useCallback(() => selector(store.getState()), [store, selector])
   );
 
   return [slice, store.setState];

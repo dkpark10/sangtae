@@ -4,7 +4,42 @@ import { render, fireEvent } from '@testing-library/react';
 import { useStore, createStore } from '../core';
 
 describe('외부 스토어', () => {
-  test('카운터', () => {
+  test('카운터 원시 숫자', () => {
+    const counterStore = createStore<number>(0);
+
+    function Counter() {
+      const [count, setState] = useStore(counterStore, (counter) => counter);
+
+      return (
+        <React.Fragment>
+          <button
+            onClick={() => {
+              setState((prev) => prev + 1);
+            }}
+          >
+            inc
+          </button>
+          <button
+            onClick={() => {
+              setState((prev) => prev - 1);
+            }}
+          >
+            dec
+          </button>
+          <h1>value: {count}</h1>
+        </React.Fragment>
+      );
+    }
+
+    const { getByText, getByRole } = render(<Counter />);
+    fireEvent.click(getByText('inc'));
+    expect(getByRole('heading', { level: 1 }).textContent).toBe('value: 1');
+
+    fireEvent.click(getByText('dec'));
+    expect(getByRole('heading', { level: 1 }).textContent).toBe('value: 0');
+  });
+
+  test('카운터 객체', () => {
     const counterStore = createStore<{ count: number }>({ count: 0 });
 
     function Counter() {
