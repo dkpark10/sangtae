@@ -33,6 +33,37 @@ export const createStore = <T>(initialState: T): Store<T> => {
   return { getState, setState, subscribe };
 };
 
+export const createPersistStore = <T>(initialState: T, options: { persist: string }): Store<T> => {
+  let state: T;
+
+  const temp = localStorage.getItem(options.persist) as T;
+  if (!temp) {
+    state = initialState;
+    localStorage.setItem(options.persist, JSON.stringify(state));
+  } else {
+    state = temp;
+  }
+
+  const getState = () => state;
+
+  const listeners = new Set<() => void>();
+
+  const setState = (fn: SetStateCallback<T>) => {
+    state = fn(state);
+    const persist = options?.persist;
+    persist && localStorage.setItem(persist, JSON.stringify(state));
+
+    listeners.forEach((listener) => listener());
+  };
+
+  const subscribe = (listener: () => void) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+
+  return { getState, setState, subscribe };
+};
+
 export const useStore = <T, U>(
   store: Store<T>,
   selector: (state: T) => U,

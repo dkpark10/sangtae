@@ -1,7 +1,7 @@
 import React from 'react';
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
-import { useStore, createStore } from '../core';
+import { useStore, createStore, createPersistStore } from '../core';
 
 describe('외부 스토어', () => {
   test('카운터 원시 숫자', () => {
@@ -264,3 +264,35 @@ describe('리렌더링', () => {
     expect(renderCount).toBe(4);
   });
 })
+
+beforeEach(() => {
+  localStorage.clear();
+});
+
+describe('로컬 스토리지 테스트', () => {
+  test('로컬 스토리지 기본값 테스트', () => {
+    localStorage.setItem('dark', 'true');
+
+    const store = createPersistStore<boolean>(false, { persist: 'dark' });
+
+    function Counter() {
+      const [dark, setDark] = useStore(store, (state) => state);
+      return (
+        <React.Fragment>
+          <button onClick={() => setDark((prev) => !prev)} type="button">
+            click
+          </button>
+          <h1>{String(dark)}</h1>
+        </React.Fragment>
+      );
+    }
+
+    const { getByRole, getByText } = render(<Counter />);
+    expect(getByRole('heading', { level: 1 }).textContent).toBe('true');
+
+    fireEvent.click(getByText('click'));
+    expect(getByRole('heading', { level: 1 }).textContent).toBe('false');
+
+    expect(localStorage.getItem('dark')).toBe('false');
+  });
+});
