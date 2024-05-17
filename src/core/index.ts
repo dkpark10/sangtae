@@ -10,6 +10,8 @@ type Store<T> = {
   subscribe: (listener: Listener) => () => boolean;
 }
 
+type UseStoreReturn<T> = [T[keyof T], (fn: SetStateCallback<T>) => void];
+
 export const createStore = <T>(initialState: T): Store<T> => {
   let state: T = initialState;
 
@@ -30,9 +32,11 @@ export const createStore = <T>(initialState: T): Store<T> => {
   return { getState, setState, subscribe };
 };
 
-export const useStore = <T>(store: Store<T>, selector: (state: T) => T[keyof T]) => {
-  return useSyncExternalStore(
+export const useStore = <T>(store: Store<T>, selector: (state: T) => T[keyof T]): UseStoreReturn<T> => {
+  const slice = useSyncExternalStore(
     store.subscribe,
     useCallback(() => selector(store.getState()), [store, selector]),
   );
+
+  return [slice, store.setState];
 };

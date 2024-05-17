@@ -8,20 +8,20 @@ describe('외부 스토어', () => {
     const counterStore = createStore<{ count: number }>({ count: 0 });
 
     function Counter() {
-      const count = useStore(counterStore, (state) => state.count);
+      const [count, setState] = useStore(counterStore, (state) => state.count);
 
       return (
         <React.Fragment>
           <button
             onClick={() => {
-              counterStore.setState((prev) => ({ count: prev.count + 1 }));
+              setState((prev) => ({ count: prev.count + 1 }));
             }}
           >
             inc
           </button>
           <button
             onClick={() => {
-              counterStore.setState((prev) => ({ count: prev.count - 1 }));
+              setState((prev) => ({ count: prev.count - 1 }));
             }}
           >
             dec
@@ -43,20 +43,20 @@ describe('외부 스토어', () => {
     const store = createStore<{ count: number }>({ count: 0 });
 
     function Brother1() {
-      const count = useStore(store, (state) => state.count);
+      const [count, setState] = useStore(store, (state) => state.count);
 
       return (
         <React.Fragment>
           <button
             onClick={() => {
-              store.setState((prev) => ({ count: prev.count + 1 }));
+              setState((prev) => ({ count: prev.count + 1 }));
             }}
           >
             inc
           </button>
           <button
             onClick={() => {
-              store.setState((prev) => ({ count: prev.count - 1 }));
+              setState((prev) => ({ count: prev.count - 1 }));
             }}
           >
             dec
@@ -67,7 +67,7 @@ describe('외부 스토어', () => {
     }
 
     function Brother2() {
-      const count = useStore(store, (state) => state.count);
+      const [count] = useStore(store, (state) => state.count);
 
       return (
         <React.Fragment>
@@ -103,20 +103,20 @@ describe('리렌더링', () => {
 
     let renderCount = 0;
     function Counter() {
-      const count = useStore(store, (state) => state.count);
+      const [count, setState] = useStore(store, (state) => state.count);
       renderCount += 1;
       return (
         <React.Fragment>
           <button
             onClick={() => {
-              store.setState((prev) => ({ count: prev.count + 1 }));
+              setState((prev) => ({ count: prev.count + 1 }));
             }}
           >
             inc
           </button>
           <button
             onClick={() => {
-              store.setState((prev) => ({ count: prev.count }));
+              setState((prev) => ({ count: prev.count }));
             }}
           >
             dec
@@ -144,13 +144,13 @@ describe('리렌더링', () => {
 
     let renderCount = 0;
     function Counter() {
-      const count = useStore(store, (state) => state.value);
+      const [count, setState] = useStore(store, (state) => state.value);
       renderCount += 1;
       return (
         <React.Fragment>
           <button
             onClick={() => {
-              store.setState((prev) => ({
+              setState((prev) => ({
                 ...prev,
                 value: {
                   foo: prev.value.foo + 1,
@@ -162,7 +162,7 @@ describe('리렌더링', () => {
           </button>
           <button
             onClick={() => {
-              store.setState((prev) => ({ ...prev }));
+              setState((prev) => ({ ...prev }));
             }}
           >
             dec
