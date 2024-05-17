@@ -30,7 +30,7 @@ export const createStore = <T>(initialState: T): Store<T> => {
   return { getState, setState, subscribe };
 };
 
-export const useCounterStore = <T>(store: Store<T>, selector: (state: T) => T[keyof T]) => {
+export const useStore = <T>(store: Store<T>, selector: (state: T) => T[keyof T]) => {
   return useSyncExternalStore(
     store.subscribe,
     useCallback(() => selector(store.getState()), [store, selector]),

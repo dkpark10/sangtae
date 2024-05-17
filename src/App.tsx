@@ -1,21 +1,21 @@
 import React from 'react';
-import { useCounterStore, createStore } from './store/index';
+import { useStore , createStore } from './core';
 import './App.css'
 
-const store = createStore<{ count: number }>({ count: 0 });
+const counterStore = createStore<{ count: number }>({ count: 0 });
 
 export default function App() {
-  const count = useCounterStore(store, (state) => state.count);
+  const count = useStore(counterStore, (state) => state.count);
 
   return (
     <React.Fragment>
       <button onClick={() => {
-        store.setState((prev) => ({ count: prev.count + 1 }));
+        counterStore.setState((prev) => ({ count: prev.count + 1 }));
       }}>
         increase
       </button>
       <button onClick={() => {
-        store.setState((prev) => ({ count: prev.count - 1 }));
+        counterStore.setState((prev) => ({ count: prev.count - 1 }));
       }}>
         decrease
       </button>

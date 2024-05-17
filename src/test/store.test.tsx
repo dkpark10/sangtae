@@ -1,27 +1,27 @@
 import React from 'react';
 import { describe, expect, test } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
-import { useCounterStore, createStore } from '../store';
+import { useStore, createStore } from '../core';
 
 describe('외부 스토어', () => {
   test('카운터', () => {
-    const store = createStore<{ count: number }>({ count: 0 });
+    const counterStore = createStore<{ count: number }>({ count: 0 });
 
     function Counter() {
-      const count = useCounterStore(store, (state) => state.count);
+      const count = useStore(counterStore, (state) => state.count);
 
       return (
         <React.Fragment>
           <button
             onClick={() => {
-              store.setState((prev) => ({ count: prev.count + 1 }));
+              counterStore.setState((prev) => ({ count: prev.count + 1 }));
             }}
           >
             inc
           </button>
           <button
             onClick={() => {
-              store.setState((prev) => ({ count: prev.count - 1 }));
+              counterStore.setState((prev) => ({ count: prev.count - 1 }));
             }}
           >
             dec
@@ -43,7 +43,7 @@ describe('외부 스토어', () => {
     const store = createStore<{ count: number }>({ count: 0 });
 
     function Brother1() {
-      const count = useCounterStore(store, (state) => state.count);
+      const count = useStore(store, (state) => state.count);
 
       return (
         <React.Fragment>
@@ -67,7 +67,7 @@ describe('외부 스토어', () => {
     }
 
     function Brother2() {
-      const count = useCounterStore(store, (state) => state.count);
+      const count = useStore(store, (state) => state.count);
 
       return (
         <React.Fragment>
@@ -103,7 +103,7 @@ describe('리렌더링', () => {
 
     let renderCount = 0;
     function Counter() {
-      const count = useCounterStore(store, (state) => state.count);
+      const count = useStore(store, (state) => state.count);
       renderCount += 1;
       return (
         <React.Fragment>
@@ -144,7 +144,7 @@ describe('리렌더링', () => {
 
     let renderCount = 0;
     function Counter() {
-      const count = useCounterStore(store, (state) => state.value);
+      const count = useStore(store, (state) => state.value);
       renderCount += 1;
       return (
         <React.Fragment>
@@ -190,7 +190,7 @@ describe('리렌더링', () => {
 
     let renderCount = 0;
     function Counter() {
-      useCounterStore(store, (state) => state.value);
+      useStore(store, (state) => state.value);
       renderCount += 1;
       return (
         <React.Fragment>
