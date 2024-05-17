@@ -30,10 +30,14 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 
+type SetStateCallback<T> = (state: T) => T;
+
+type Listener = () => void
+
 type Store<T> = {
   getState: () => T;
-  setState: (fn: any) => void;
-  subscribe: (l: any) => () => boolean;
+  setState: (fn: SetStateCallback<T>) => void;
+  subscribe: (listener: Listener) => () => boolean;
 }
 
 const createStore = <T>(initialState: T): Store<T> => {
@@ -41,14 +45,14 @@ const createStore = <T>(initialState: T): Store<T> => {
 
   const getState = () => state;
 
-  const listeners = new Set();
+  const listeners = new Set<Listener>();
 
-  const setState = (fn: any) => {
+  const setState = (fn: SetStateCallback<T>) => {
     state = fn(state);
-    listeners.forEach((l) => l());
+    listeners.forEach((listener) => listener());
   };
 
-  const subscribe = (listener: any) => {
+  const subscribe = (listener: Listener) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   };

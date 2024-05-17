@@ -3,7 +3,7 @@ import { useCounterStore, store } from './store/index';
 import './App.css'
 
 export default function App() {
-  const { count } = useCounterStore(
+  const count = useCounterStore(
     store,
     (state) => state.count,
   );
