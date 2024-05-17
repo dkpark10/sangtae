@@ -1,12 +1,11 @@
 import React from 'react';
-import { useCounterStore, store } from './store/index';
+import { useCounterStore, createStore } from './store/index';
 import './App.css'
 
+const store = createStore<{ count: number }>({ count: 0 });
+
 export default function App() {
-  const count = useCounterStore(
-    store,
-    (state) => state.count,
-  );
+  const count = useCounterStore(store, (state) => state.count);
 
   return (
     <React.Fragment>
