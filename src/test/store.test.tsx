@@ -38,6 +38,63 @@ describe('외부 스토어', () => {
     fireEvent.click(getByText('dec'));
     expect(getByRole('heading', { level: 1 }).textContent).toBe('value: 0');
   });
+
+  test('형제간 상태 공유', () => {
+    const store = createStore<{ count: number }>({ count: 0 });
+
+    function Brother1() {
+      const count = useCounterStore(store, (state) => state.count);
+
+      return (
+        <React.Fragment>
+          <button
+            onClick={() => {
+              store.setState((prev) => ({ count: prev.count + 1 }));
+            }}
+          >
+            inc
+          </button>
+          <button
+            onClick={() => {
+              store.setState((prev) => ({ count: prev.count - 1 }));
+            }}
+          >
+            dec
+          </button>
+          <h1 data-testid='brother1'>value: {count}</h1>
+        </React.Fragment>
+      );
+    }
+
+    function Brother2() {
+      const count = useCounterStore(store, (state) => state.count);
+
+      return (
+        <React.Fragment>
+          <h1 data-testid='brother2'>value: {count}</h1>
+        </React.Fragment>
+      );
+    }
+
+    function Parent() {
+      return (
+        <React.Fragment>
+          <Brother1 />
+          <Brother2 />
+        </React.Fragment>
+      )
+    }
+
+    const { getByText, getByTestId } = render(<Parent />);
+    fireEvent.click(getByText('inc'));
+    expect(getByTestId('brother1').textContent).toBe('value: 1');
+    expect(getByTestId('brother2').textContent).toBe('value: 1');
+
+    fireEvent.click(getByText('dec'));
+    expect(getByTestId('brother1').textContent).toBe('value: 0');
+    expect(getByTestId('brother2').textContent).toBe('value: 0');
+
+  });
 });
 
 describe('리렌더링', () => {
@@ -126,14 +183,14 @@ describe('리렌더링', () => {
     expect(renderCount).toBe(2);
   });
 
-  test('객체1', () => {
-    const store = createStore<{ value: { foo: number } }>({
-      value: { foo: 12 },
+  test('객체2', () => {
+    const store = createStore<{ value: number[] }>({
+      value: [1, 2, 3],
     });
 
     let renderCount = 0;
     function Counter() {
-      const count = useCounterStore(store, (state) => state.value);
+      useCounterStore(store, (state) => state.value);
       renderCount += 1;
       return (
         <React.Fragment>
@@ -141,9 +198,7 @@ describe('리렌더링', () => {
             onClick={() => {
               store.setState((prev) => ({
                 ...prev,
-                value: {
-                  foo: prev.value.foo + 1,
-                },
+                value: prev.value.map((item) => item * 2),
               }));
             }}
           >
@@ -151,12 +206,14 @@ describe('리렌더링', () => {
           </button>
           <button
             onClick={() => {
-              store.setState((prev) => ({ ...prev }));
+              store.setState((prev) => ({
+                ...prev,
+                value: prev.value,
+              }));
             }}
           >
             dec
           </button>
-          <h1>value: {count.foo}</h1>
         </React.Fragment>
       );
     }
