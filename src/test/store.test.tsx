@@ -1,7 +1,13 @@
 import React from 'react';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
-import { useStore, createStore, createPersistStore } from '../core';
+import {
+  useStore,
+  useSetStore,
+  useValueStore,
+  createStore,
+  createPersistStore,
+} from '../core';
 
 describe('외부 스토어', () => {
   test('카운터 원시 숫자', () => {
@@ -128,7 +134,59 @@ describe('외부 스토어', () => {
     fireEvent.click(getByText('dec'));
     expect(getByTestId('brother1').textContent).toBe('value: 0');
     expect(getByTestId('brother2').textContent).toBe('value: 0');
+  });
 
+  test('set, value 훅 테스트', () => {
+    const store = createStore<{ count: number }>({ count: 0 });
+
+    function Brother1() {
+      const setState = useSetStore(store);
+
+      return (
+        <React.Fragment>
+          <button
+            onClick={() => {
+              setState((prev) => ({ count: prev.count + 1 }));
+            }}
+          >
+            inc
+          </button>
+          <button
+            onClick={() => {
+              setState((prev) => ({ count: prev.count - 1 }));
+            }}
+          >
+            dec
+          </button>
+        </React.Fragment>
+      );
+    }
+
+    function Brother2() {
+      const count = useValueStore(store, (state) => state.count);
+
+      return (
+        <React.Fragment>
+          <h1 data-testid='brother2'>value: {count}</h1>
+        </React.Fragment>
+      );
+    }
+
+    function Parent() {
+      return (
+        <React.Fragment>
+          <Brother1 />
+          <Brother2 />
+        </React.Fragment>
+      )
+    }
+
+    const { getByText, getByTestId } = render(<Parent />);
+    fireEvent.click(getByText('inc'));
+    expect(getByTestId('brother2').textContent).toBe('value: 1');
+
+    fireEvent.click(getByText('dec'));
+    expect(getByTestId('brother2').textContent).toBe('value: 0');
   });
 });
 

@@ -75,3 +75,19 @@ export const useStore = <T, U>(
 
   return [slice, store.setState];
 };
+
+export const useValueStore = <T, U>(
+  store: Store<T>,
+  selector: (state: T) => U
+): U => {
+  const slice = useSyncExternalStore(
+    store.subscribe,
+    useCallback(() => selector(store.getState()), [store, selector])
+  );
+
+  return slice;
+};
+
+export const useSetStore = <T>(store: Store<T>): Store<T>['setState'] => {
+  return store.setState;
+};
