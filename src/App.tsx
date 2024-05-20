@@ -1,6 +1,6 @@
 import React from 'react';
-import { useStore , createStore } from './core';
-import './App.css'
+// import { useStore , createStore } from './core';
+import { useStore , createStore } from './core2';
 
 const counterStore = createStore<{ count: number }>({ count: 0 });
 
@@ -15,7 +15,7 @@ export default function App() {
         increase
       </button>
       <button onClick={() => {
-        setState((prev) => ({ count: prev.count - 1 }));
+        setState((prev) => ({ count: prev.count }));
       }}>
         decrease
       </button>
