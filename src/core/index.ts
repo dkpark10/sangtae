@@ -4,7 +4,7 @@ type SetStateCallback<T> = (state: T) => T;
 
 type Store<T> = {
   getState: () => T;
-  setState: (fn: SetStateCallback<T>) => void;
+  setState: (partial: (state: T) => T | T) => void;
   subscribe: (listener: () => void) => () => boolean;
 };
 
@@ -20,8 +20,9 @@ export const createStore = <T>(initialState: T): Store<T> => {
 
   const listeners = new Set<() => void>();
 
-  const setState = (fn: SetStateCallback<T>) => {
-    state = fn(state);
+  const setState = (partial: (state: T) => T | T) => {
+    const nextState = typeof partial === 'function' ? partial(state) : partial;
+    state = nextState;
     listeners.forEach((listener) => listener());
   };
 
@@ -91,3 +92,4 @@ export const useValueStore = <T, U>(
 export const useSetStore = <T>(store: Store<T>): Store<T>['setState'] => {
   return store.setState;
 };
+
